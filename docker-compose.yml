@@ -1,0 +1,9 @@
+services:
+  rag:
+    build: .
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env
+    volumes:
+      - ./chroma_db:/app/chroma_db
