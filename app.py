@@ -118,9 +118,10 @@ def chat():
     notebook = data.get("notebook", DEFAULT_NOTEBOOK).strip() or DEFAULT_NOTEBOOK
     top_k = int(data.get("top_k", DEFAULT_TOP_K))
     alpha = float(data.get("alpha", DEFAULT_HYBRID_ALPHA))
+    api_key = (data.get("gemini_api_key") or "").strip() or None
 
     try:
-        result = answer_query(notebook, query_text, top_k=top_k, alpha=alpha)
+        result = answer_query(notebook, query_text, top_k=top_k, alpha=alpha, api_key=api_key)
         return jsonify({
             "status": "success",
             "answer": result["answer"],

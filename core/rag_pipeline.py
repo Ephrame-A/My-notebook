@@ -66,7 +66,8 @@ def build_prompt(query: str, retrieved_chunks: List[Dict[str, Any]], history_tex
 
 
 def answer_query(collection_name: str, query: str, top_k: int = DEFAULT_TOP_K,
-                  alpha: float = DEFAULT_HYBRID_ALPHA, use_history: bool = True) -> Dict[str, Any]:
+                  alpha: float = DEFAULT_HYBRID_ALPHA, use_history: bool = True,
+                  api_key: str = None) -> Dict[str, Any]:
     """Runs retrieval, builds a citation-aware prompt, calls the LLM, and
     records the turn in the notebook's conversation history."""
     retrieved = retrieve(collection_name, query, top_k=top_k, alpha=alpha)
@@ -79,12 +80,12 @@ def answer_query(collection_name: str, query: str, top_k: int = DEFAULT_TOP_K,
 
     history_text = chat_history.format_history_for_prompt(collection_name) if use_history else ""
     prompt = build_prompt(query, retrieved, history_text)
-    
+
     try:
-        answer_text = _call_llm(prompt)
+        answer_text = _call_llm(prompt, api_key=api_key)
     except Exception as e:
         print(f"LLM Generation Error: {e}")
-        answer_text = "I'm sorry, I was unable to generate an answer at this time (e.g., API limits reached). Please see the retrieved sources in the citation inspector on the right."
+        answer_text = "I'm sorry, I was unable to generate an answer at this time (e.g., API limits reached or invalid key). Please see the retrieved sources in the citation inspector on the right."
 
     if use_history:
         chat_history.add_turn(collection_name, "user", query)
@@ -99,13 +100,16 @@ def answer_query(collection_name: str, query: str, top_k: int = DEFAULT_TOP_K,
     return {"answer": answer_text, "retrieved_chunks": numbered_chunks}
 
 
-def _call_llm(prompt: str) -> str:
+def _call_llm(prompt: str, api_key: str = None) -> str:
     from google import genai
 
-    api_key = os.getenv("GEMINI_API_KEY")
-    if not api_key:
-        raise RuntimeError("GEMINI_API_KEY is not set. Add it to your .env file.")
+    # Prefer the caller-supplied key; fall back to server env var.
+    resolved_key = api_key or os.getenv("GEMINI_API_KEY")
+    if not resolved_key:
+        raise RuntimeError(
+            "No Gemini API key found. Please enter your API key in the settings panel."
+        )
 
-    client = genai.Client(api_key=api_key)
+    client = genai.Client(api_key=resolved_key)
     response = client.models.generate_content(model=GEMINI_MODEL_NAME, contents=prompt)
     return response.text

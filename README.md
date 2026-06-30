@@ -50,7 +50,7 @@ python app.py
 ## Run with Docker
 
 ```bash
-cp .env.example .env   # fill in GEMINI_API_KEY
+cp .env.example .env   
 docker compose up --build
 # open http://localhost:5000
 ```

@@ -19,6 +19,7 @@
   --ink-text:#2A2A28;
   --muted:#8A8478;
   --danger:#A14B3C;
+  --warning:#C8880A;
 }
 *{box-sizing:border-box;}
 html,body{height:100%;}
@@ -155,6 +156,53 @@ body{
 }
 
 #fileInput{ display:none; }
+
+/* ---------- API key block ---------- */
+.api-key-block{
+  margin-top:auto;
+  padding-top:18px;
+  border-top:1px solid #323D52;
+}
+.api-key-label{
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:1px;
+  color:#7C8294;
+  margin:0 0 6px 2px;
+  display:block;
+}
+.api-key-input{
+  width:100%;
+  background:var(--ink-soft);
+  border:1px solid #3A4459;
+  border-radius:6px;
+  padding:8px 10px;
+  font-family:'IBM Plex Mono', monospace;
+  font-size:12px;
+  color:#E8E4DA;
+  letter-spacing:0.5px;
+}
+.api-key-input:focus{ outline:none; border-color:var(--brass); }
+.api-key-input::placeholder{ color:#505970; }
+.api-key-hint{
+  font-size:10.5px;
+  color:#606880;
+  margin-top:5px;
+  line-height:1.4;
+}
+.api-key-hint a{ color:var(--brass); text-decoration:none; }
+.api-key-hint a:hover{ text-decoration:underline; }
+.api-key-banner{
+  display:none;
+  background:#3D2200;
+  border:1px solid #7A4A00;
+  border-radius:6px;
+  padding:9px 11px;
+  font-size:12px;
+  color:#F5C97A;
+  margin-top:10px;
+  line-height:1.45;
+}
 
 /* ---------- Center: chat ---------- */
 .chat-col{
@@ -402,6 +450,26 @@ body{
 
     <div class="rail-label">Sources</div>
     <div id="sourcesList"></div>
+
+    <!-- API Key input pinned to the bottom of the sidebar -->
+    <div class="api-key-block">
+      <span class="api-key-label">Gemini API Key</span>
+      <input
+        class="api-key-input"
+        id="geminiApiKey"
+        type="password"
+        placeholder="AIza…"
+        autocomplete="off"
+        spellcheck="false"
+      >
+      <p class="api-key-hint">
+        Your key is never stored — sent only per request.<br>
+        <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Get a free key →</a>
+      </p>
+      <div class="api-key-banner" id="apiKeyBanner">
+        ⚠ Please enter a Gemini API key above before asking a question.
+      </div>
+    </div>
   </aside>
 
   <!-- CENTER: Chat -->
@@ -476,6 +544,8 @@ const alphaVal = document.getElementById('alphaVal');
 const citationList = document.getElementById('citationList');
 const railSub = document.getElementById('railSub');
 const clearChatBtn = document.getElementById('clearChatBtn');
+const geminiApiKeyInput = document.getElementById('geminiApiKey');
+const apiKeyBanner = document.getElementById('apiKeyBanner');
 
 let lastRetrievedChunks = [];
 
@@ -616,6 +686,15 @@ async function sendMessage() {
   const text = queryInput.value.trim();
   if (!text) return;
 
+  // Warn if no API key is provided
+  const apiKey = geminiApiKeyInput.value.trim();
+  if (!apiKey) {
+    apiKeyBanner.style.display = 'block';
+    geminiApiKeyInput.focus();
+    return;
+  }
+  apiKeyBanner.style.display = 'none';
+
   addMessage('user', text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'));
   queryInput.value = '';
   queryInput.style.height = 'auto';
@@ -632,6 +711,7 @@ async function sendMessage() {
         notebook: notebook(),
         top_k: parseInt(document.getElementById('topK').value),
         alpha: parseFloat(alphaSlider.value),
+        gemini_api_key: apiKey,
       }),
     });
     const data = await res.json();
