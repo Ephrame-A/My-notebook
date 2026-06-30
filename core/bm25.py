@@ -2,7 +2,7 @@
 Sparse retrieval: BM25
 =======================
 A from-scratch implementation of the BM25 ranking algorithm using a plain
-inverted index. =
+inverted index.
 
 BM25 score for a term in a document combines:
 - TF  (term frequency): how often the term appears in this document.
@@ -24,7 +24,7 @@ class BM25Index:
         self.inverted_index: Dict[str, List[str]] = {}   # term -> [doc_id, ...]
         self.term_freqs: Dict[str, Dict[str, int]] = {}  # term -> {doc_id: count}
         self.doc_lengths: Dict[str, int] = {}             # doc_id -> token count
-        self.documents: Dict[str, str] = {}                # doc_id -> raw text
+        self.documents: Dict[str, str] = {}               # doc_id -> raw text
         self.total_docs = 0
         self.avg_doc_length = 0.0
 
@@ -55,7 +55,6 @@ class BM25Index:
         df = len(self.inverted_index.get(term, []))
         if df == 0:
             return 0.0
-        # +0.5 / +1.0 smoothing keeps the score well-behaved for very common terms.
         return math.log(1 + (self.total_docs - df + 0.5) / (df + 0.5))
 
     def search(self, query: str, top_k: int = 5) -> List[Tuple[str, float]]:
@@ -79,13 +78,25 @@ class BM25Index:
 
 
 def build_bm25_index(doc_ids: List[str], texts: List[str]) -> BM25Index:
-    """Builds a fresh in-memory BM25 index from a list of chunks.
-
-    We rebuild this on demand from whatever is stored in Chroma rather than
-    persisting it separately -- it's cheap for learning-scale datasets and
-    keeps the sparse and dense stores trivially in sync.
-    """
+    """Builds a fresh in-memory BM25 index from a list of chunks."""
     index = BM25Index()
     for doc_id, text in zip(doc_ids, texts):
         index.add_document(doc_id, text)
+    return index
+
+
+# ---------------------------------------------------------------------------
+# Per-collection BM25 cache — rebuilt only when doc set changes
+# ---------------------------------------------------------------------------
+_bm25_cache: Dict[str, Tuple[str, BM25Index]] = {}
+
+
+def get_cached_bm25(collection_name: str, doc_ids: List[str], texts: List[str]) -> BM25Index:
+    """Return a cached BM25 index, rebuilding only when the document set changes."""
+    version_token = str(sorted(doc_ids))
+    cached = _bm25_cache.get(collection_name)
+    if cached is not None and cached[0] == version_token:
+        return cached[1]
+    index = build_bm25_index(doc_ids, texts)
+    _bm25_cache[collection_name] = (version_token, index)
     return index

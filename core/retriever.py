@@ -18,7 +18,7 @@ alpha=1.0 -> pure semantic, alpha=0.0 -> pure keyword, alpha=0.5 -> blend.
 
 from typing import List, Dict, Any
 from core.embeddings import embed_query
-from core.bm25 import build_bm25_index
+from core.bm25 import get_cached_bm25
 from core import vectorstore
 from core.config import DEFAULT_TOP_K, DEFAULT_HYBRID_ALPHA
 
@@ -55,7 +55,7 @@ def retrieve(collection_name: str, query: str, top_k: int = DEFAULT_TOP_K,
             dense_scores[doc_id] = 1.0 / (1.0 + distance)
 
     # --- Sparse (keyword / BM25) scores ---
-    bm25_index = build_bm25_index(doc_ids, documents)
+    bm25_index = get_cached_bm25(collection_name, doc_ids, documents)
     sparse_scores = dict(bm25_index.search(query, top_k=max(top_k * 3, top_k)))
 
     # --- Fuse ---

@@ -13,6 +13,14 @@ dotenv.load_dotenv()
 app = Flask(__name__)
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
+# Warm the embedding model at startup so the first query isn't slow.
+try:
+    from core.embeddings import get_embedding_model
+    get_embedding_model()
+except Exception as _e:
+    print(f"[startup] Embedding model warm-up skipped: {_e}")
+
+
 ALLOWED_EXTENSIONS = {".pdf", ".txt", ".md"}
 DEFAULT_NOTEBOOK = "default_kb"
 
