@@ -79,7 +79,12 @@ def answer_query(collection_name: str, query: str, top_k: int = DEFAULT_TOP_K,
 
     history_text = chat_history.format_history_for_prompt(collection_name) if use_history else ""
     prompt = build_prompt(query, retrieved, history_text)
-    answer_text = _call_llm(prompt)
+    
+    try:
+        answer_text = _call_llm(prompt)
+    except Exception as e:
+        print(f"LLM Generation Error: {e}")
+        answer_text = "I'm sorry, I was unable to generate an answer at this time (e.g., API limits reached). Please see the retrieved sources in the citation inspector on the right."
 
     if use_history:
         chat_history.add_turn(collection_name, "user", query)

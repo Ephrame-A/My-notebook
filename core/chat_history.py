@@ -9,7 +9,7 @@ follow-up questions like "what about the second one?" have context.
 from typing import List, Dict
 from collections import defaultdict
 
-MAX_TURNS = 6  # how many past exchanges to keep per notebook
+MAX_TURNS = 3  # how many past exchanges to keep per notebook
 
 _history: Dict[str, List[Dict[str, str]]] = defaultdict(list)
 

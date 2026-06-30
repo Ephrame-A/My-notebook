@@ -17,6 +17,6 @@ RUN mkdir -p chroma_db uploads
 EXPOSE 5000
 
 # Pre-download the embedding model at build time (optional, speeds up first request)
-# RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('all-MiniLM-L6-v2')"
+RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('all-MiniLM-L6-v2')"
 
 CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "2", "--timeout", "120", "app:app"]
