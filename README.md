@@ -1,4 +1,4 @@
-# Marginal — a notebook for your documents
+# My-Notebook — a notebook for your documents
 
 A self-hosted, NotebookLM-style RAG app: drop in PDFs/text files, chat with
 them, and get answers with clickable numbered citations that jump to the
@@ -61,15 +61,6 @@ docker compose up --build
 python app.py            # in one terminal
 python test_app.py       # in another
 ```
-
-## API
-
-| Route | Method | Purpose |
-|---|---|---|
-| `/api/sources/upload` | POST | Upload one or more files (`files`, `notebook`) |
-| `/api/sources` | GET | List sources with chunk counts (`?notebook=`) |
-| `/api/sources/<name>` | DELETE | Remove a single source and its chunks |
-| `/api/chat` | POST | Ask a question, get a cited answer (`query`, `notebook`, `top_k`, `alpha`) |
-| `/api/chat/history` | GET / DELETE | Read or clear conversation memory |
-| `/api/notebooks` | GET | List notebooks (collections) |
+## deployment
+- The site is live on [my-notebook](https://my-notebook-production-012d.up.railway.app)
 
