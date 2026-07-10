@@ -2,8 +2,9 @@
 
 A self-hosted, NotebookLM-style RAG app: drop in PDFs/text files, chat with
 them, and get answers with clickable numbered citations that jump to the
-exact source passage. Hybrid retrieval (semantic + keyword) under the hood,
-fully visible and editable.
+exact source passage. Generate audio overviews of your documents — as a
+two-host podcast or a single-narrator summary — powered by Edge-TTS. Hybrid
+retrieval (semantic + keyword) under the hood, fully visible and editable.
 
 ## What makes this different from a toy RAG demo
 
@@ -15,6 +16,9 @@ fully visible and editable.
   semantic/keyword/fused scores visible.
 - **Source management** — see every indexed document with its chunk count,
   remove one without rebuilding the whole notebook.
+- **Audio overviews** — generate a two-host podcast discussion or a
+  single-narrator summary of your notebook, synthesised with Edge-TTS.
+  Listen directly in the browser.
 - **A real interface** — three-pane layout (sources / chat / source
   inspector), not a single form.
 
@@ -29,7 +33,8 @@ core/
   retriever.py       fuses dense + sparse scores (tunable alpha)
   chat_history.py    short rolling conversation memory per notebook
   rag_pipeline.py    ingestion + citation-aware prompt building + LLM call
-app.py               Flask routes (sources, chat, notebooks)
+  audio_generator.py script generation (LLM) + Edge-TTS synthesis + MP3 concat
+app.py               Flask routes (sources, chat, audio, notebooks)
 templates/index.html three-pane UI: sources rail / chat / citation inspector
 ```
 
@@ -62,5 +67,5 @@ python app.py            # in one terminal
 python test_app.py       # in another
 ```
 ## deployment
-- The site is live on [my-notebook](https://my-notebook-production-012d.up.railway.app)
+- The site is live on [my-notebook](https://my-notebook.up.railway.app)
 

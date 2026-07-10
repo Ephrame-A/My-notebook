@@ -1,17 +1,20 @@
 import os
 import dotenv
-from flask import Flask, request, jsonify, render_template
+import uuid
+from flask import Flask, request, jsonify, render_template, send_file
 from werkzeug.utils import secure_filename
 from pypdf import PdfReader
 
 from core import vectorstore, chat_history
 from core.rag_pipeline import ingest_document, answer_query
-from core.config import UPLOAD_FOLDER, DEFAULT_TOP_K, DEFAULT_HYBRID_ALPHA, CHUNK_SIZE, CHUNK_OVERLAP
+from core.audio_generator import generate_audio_overview
+from core.config import UPLOAD_FOLDER, DEFAULT_TOP_K, DEFAULT_HYBRID_ALPHA, CHUNK_SIZE, CHUNK_OVERLAP, AUDIO_CACHE_DIR
 
 dotenv.load_dotenv()
 
 app = Flask(__name__)
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+os.makedirs(AUDIO_CACHE_DIR, exist_ok=True)
 
 # Warm the embedding model at startup so the first query isn't slow.
 try:
@@ -150,6 +153,56 @@ def reset_chat_history():
     notebook = request.args.get("notebook", DEFAULT_NOTEBOOK)
     chat_history.clear_history(notebook)
     return jsonify({"status": "success", "message": "Conversation cleared."})
+
+
+# ----------------------------------------------------------------
+# Audio overview (podcast / narrator)
+# ----------------------------------------------------------------
+
+@app.route("/api/audio/generate", methods=["POST"])
+def generate_audio():
+    data = request.get_json(silent=True) or {}
+
+    notebook = data.get("notebook", DEFAULT_NOTEBOOK).strip() or DEFAULT_NOTEBOOK
+    mode = (data.get("mode") or "narrator").strip()
+    topic = (data.get("topic") or "").strip()
+    api_key = (data.get("gemini_api_key") or "").strip() or None
+
+    if mode not in ("podcast", "narrator"):
+        return jsonify({"status": "error", "message": "mode must be 'podcast' or 'narrator'."}), 400
+
+    if not topic:
+        return jsonify({"status": "error", "message": "Please enter a topic or question for the audio to focus on."}), 400
+
+    if not api_key:
+        return jsonify({"status": "error", "message": "Please enter your Gemini API key in the left panel before generating audio."}), 400
+
+    sources = vectorstore.list_sources(notebook)
+    if not sources:
+        return jsonify({"status": "error", "message": "No sources found. Please upload at least one document before generating audio."}), 400
+
+    filename = f"{uuid.uuid4().hex}.mp3"
+    output_path = os.path.join(AUDIO_CACHE_DIR, filename)
+
+    try:
+        generate_audio_overview(notebook, mode, output_path, topic=topic, api_key=api_key)
+    except ValueError as e:
+        return jsonify({"status": "error", "message": str(e)}), 400
+    except RuntimeError as e:
+        return jsonify({"status": "error", "message": str(e)}), 400
+    except Exception:
+        return jsonify({"status": "error", "message": "Something went wrong while generating audio. Please check your API key and try again."}), 500
+
+    return jsonify({"status": "success", "audio_url": f"/api/audio/{filename}"})
+
+
+@app.route("/api/audio/<path:filename>", methods=["GET"])
+def serve_audio(filename):
+    safe_name = os.path.basename(filename)
+    file_path = os.path.join(AUDIO_CACHE_DIR, safe_name)
+    if not os.path.isfile(file_path):
+        return jsonify({"status": "error", "message": "Audio file not found."}), 404
+    return send_file(file_path, mimetype="audio/mpeg")
 
 
 # ----------------------------------------------------------------

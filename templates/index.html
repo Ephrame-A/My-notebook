@@ -257,8 +257,8 @@ body{
 }
 .dash-hero p{font-size:14px;line-height:1.7;color:var(--muted);margin-bottom:28px;}
 .dash-steps{
-  display:grid;grid-template-columns:repeat(3,1fr);gap:14px;
-  max-width:680px;margin:0 auto 32px;
+  display:grid;grid-template-columns:repeat(4,1fr);gap:14px;
+  max-width:800px;margin:0 auto 32px;
 }
 .step-card{
   background:var(--paper-card);border:1px solid var(--paper-line);
@@ -357,7 +357,7 @@ body{
   border:1px solid #D9BD8C;border-radius:3px;
   font-family:'IBM Plex Mono',monospace;font-size:10.5px;font-weight:500;
   margin:0 1px;cursor:pointer;transform:translateY(-1px);
-  transition:background var(--anim-fast), color var(--anim-fast);
+  transition: background var(--anim-fast), color var(--anim-fast);
 }
 .cite-chip:hover{background:var(--brass);color:#fff;}
 
@@ -437,6 +437,63 @@ body{
   background:var(--paper);color:var(--muted);
 }
 .chunk-card .text{font-size:12.5px;line-height:1.55;color:var(--ink-text);}
+
+/* =========================================================
+   AUDIO OVERVIEW
+   ========================================================= */
+.audio-btn{background:var(--brass-soft);border:1.5px solid var(--brass);color:var(--brass);padding:6px 13px;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;transition:background var(--anim-fast),color var(--anim-fast);}
+.audio-btn:hover{background:var(--brass);color:var(--paper);}
+.audio-modal-overlay{position:fixed;inset:0;background:rgba(27,36,48,.45);display:flex;align-items:center;justify-content:center;z-index:900;}
+.audio-modal-overlay.hidden{display:none;}
+.audio-modal{background:var(--paper-card);border:1px solid var(--paper-line);border-radius:12px;padding:28px 28px 20px;width:min(480px,90vw);box-shadow:0 8px 32px rgba(27,36,48,.18);}
+.audio-modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.audio-modal-header h3{font-family:'Fraunces',serif;font-size:18px;font-weight:600;color:var(--ink);}
+.audio-modal-close{background:none;border:none;cursor:pointer;font-size:16px;color:var(--muted);padding:2px 6px;border-radius:4px;}
+.audio-modal-close:hover{color:var(--ink);}
+.audio-modal-desc{color:var(--muted);font-size:13px;margin-bottom:18px;}
+.audio-mode-selector{display:flex;flex-direction:column;gap:10px;margin-bottom:20px;}
+.audio-mode-option{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border:1.5px solid var(--paper-line);border-radius:8px;cursor:pointer;transition:border-color var(--anim-fast),background var(--anim-fast);}
+.audio-mode-option:has(input:checked){border-color:var(--brass);background:var(--brass-soft);}
+.audio-mode-option input{margin-top:2px;accent-color:var(--brass);}
+.audio-mode-label{display:flex;flex-direction:column;gap:2px;}
+.audio-mode-label strong{font-size:13.5px;color:var(--ink);}
+.audio-mode-sub{font-size:12px;color:var(--muted);}
+.audio-status{font-size:13px;color:var(--muted);margin-bottom:14px;min-height:20px;}
+.audio-status.hidden{display:none;}
+.audio-status.error{color:var(--danger);}
+.audio-player{width:100%;margin-bottom:16px;border-radius:6px;}
+.audio-player.hidden{display:none;}
+.audio-modal-footer{display:flex;justify-content:flex-end;}
+.audio-generate-btn{background:var(--brass);color:var(--paper);border:none;padding:9px 22px;border-radius:7px;font-size:14px;font-weight:600;cursor:pointer;transition:opacity var(--anim-fast);}
+.audio-generate-btn:disabled{opacity:.5;cursor:not-allowed;}
+.audio-generate-btn:not(:disabled):hover{opacity:.88;}
+.audio-topic-input{
+  width:100%;resize:none;border:1px solid var(--paper-line);background:#fff;
+  border-radius:7px;padding:10px 12px;font-family:'IBM Plex Sans',sans-serif;
+  font-size:13.5px;line-height:1.5;margin-bottom:16px;max-height:80px;
+  transition:border-color var(--anim-fast);
+}
+.audio-topic-input:focus{outline:none;border-color:var(--brass);}
+.audio-cache-card{
+  background:var(--ink-soft);border:1px solid #36405530;
+  border-left:3px solid var(--brass);border-radius:5px;
+  padding:9px 10px;margin-bottom:6px;position:relative;cursor:pointer;
+  animation:slideIn var(--anim-med) ease;
+  transition:border-left-color var(--anim-fast);
+}
+.audio-cache-card:hover{border-left-color:var(--brass-light);}
+.audio-cache-card.playing{border-left-color:var(--sage);}
+.audio-cache-card .topic{font-size:12px;font-weight:500;color:#EDEAE0;word-break:break-word;padding-right:18px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
+.audio-cache-card .meta{font-size:10.5px;color:#8E94A3;margin-top:2px;}
+.audio-cache-card .del{
+  position:absolute;top:7px;right:7px;background:none;border:none;
+  color:#6B7385;cursor:pointer;font-size:13px;line-height:1;
+  transition:color var(--anim-fast);
+}
+.audio-cache-card .del:hover{color:var(--danger);}
+.audio-sidebar-player{width:100%;margin-top:8px;border-radius:4px;height:32px;}
+.audio-sidebar-player.hidden{display:none;}
+.empty-audio{font-size:12px;color:#6B7385;font-style:italic;padding:6px 2px;}
 
 /* =========================================================
    SCROLLBARS
@@ -534,6 +591,10 @@ body{
     <div class="rail-label">Sources</div>
     <div id="sourcesList"></div>
 
+    <div class="rail-label" style="margin-top:14px">Audio</div>
+    <div id="audioList"><div class="empty-audio">No audio generated yet.</div></div>
+    <audio id="sidebarAudioPlayer" class="audio-sidebar-player hidden" controls></audio>
+
     <div class="api-key-block">
       <span class="api-key-label">Gemini API Key</span>
       <input class="api-key-input" id="geminiApiKey" type="password"
@@ -559,6 +620,7 @@ body{
         </div>
       </div>
       <div class="header-actions">
+        <button class="audio-btn" id="audioOverviewBtn" title="Generate audio overview">&#9654; Audio Overview</button>
         <button class="clear-btn" id="clearChatBtn">Clear conversation</button>
         <button class="sidebar-toggle" id="toggleRight" title="Toggle citations panel" aria-label="Toggle citations panel">⊞</button>
       </div>
@@ -569,7 +631,7 @@ body{
       <div class="dash-hero">
         <span class="dash-glyph">§</span>
         <h2>Welcome to My Notebook</h2>
-        <p>Upload your documents and ask questions. Every answer is grounded in your sources with citations you can click to verify — like having a research assistant that only knows what you've taught it.</p>
+        <p>Upload your documents, ask questions, or generate audio overviews. Every answer is grounded in your sources with citations you can click to verify — like having a research assistant that only knows what you've taught it.</p>
       </div>
       <div class="dash-steps">
         <div class="step-card">
@@ -586,6 +648,11 @@ body{
           <span class="step-num">03</span>
           <h3>Ask anything</h3>
           <p>Type a question below. Answers cite numbered sources you can click to inspect.</p>
+        </div>
+        <div class="step-card">
+          <span class="step-num">04</span>
+          <h3>Listen to it</h3>
+          <p>Click Audio Overview to generate a podcast or narrator summary you can listen to in your browser.</p>
         </div>
       </div>
       <button class="dash-start-btn" id="dashStartBtn">Start asking →</button>
@@ -632,6 +699,39 @@ body{
 
 </div>
 
+<!-- Audio Overview Modal (outside shell to avoid grid clipping) -->
+<div class="audio-modal-overlay hidden" id="audioModalOverlay">
+  <div class="audio-modal" role="dialog" aria-modal="true">
+    <div class="audio-modal-header">
+      <h3>Audio Overview</h3>
+      <button class="audio-modal-close" id="audioModalClose" aria-label="Close">&#10005;</button>
+    </div>
+    <p class="audio-modal-desc">Generate a spoken summary of this notebook's content.</p>
+    <textarea class="audio-topic-input" id="audioTopicInput" rows="2" placeholder="What should the audio focus on? (e.g. &quot;Explain the key arguments&quot;)"></textarea>
+    <div class="audio-mode-selector">
+      <label class="audio-mode-option">
+        <input type="radio" name="audioMode" value="podcast">
+        <span class="audio-mode-label">
+          <strong>Two-host podcast</strong>
+          <span class="audio-mode-sub">Two voices discuss key ideas in a conversation</span>
+        </span>
+      </label>
+      <label class="audio-mode-option">
+        <input type="radio" name="audioMode" value="narrator" checked>
+        <span class="audio-mode-label">
+          <strong>Single narrator</strong>
+          <span class="audio-mode-sub">One voice delivers a clear summary monologue</span>
+        </span>
+      </label>
+    </div>
+    <div id="audioStatus" class="audio-status hidden"></div>
+    <audio id="audioPlayer" controls class="audio-player hidden"></audio>
+    <div class="audio-modal-footer">
+      <button class="audio-generate-btn" id="audioGenerateBtn">Generate</button>
+    </div>
+  </div>
+</div>
+
 <script>
 /* =========================================================
    DOM REFS
@@ -665,6 +765,15 @@ const uploadToast   = document.getElementById('uploadToast');
 const uploadToastLabel = document.getElementById('uploadToastLabel');
 const dashStartBtn  = document.getElementById('dashStartBtn');
 const splash        = document.getElementById('splash');
+const audioOverviewBtn  = document.getElementById('audioOverviewBtn');
+const audioModalOverlay = document.getElementById('audioModalOverlay');
+const audioModalClose   = document.getElementById('audioModalClose');
+const audioGenerateBtn  = document.getElementById('audioGenerateBtn');
+const audioTopicInput   = document.getElementById('audioTopicInput');
+const audioStatus       = document.getElementById('audioStatus');
+const audioPlayer       = document.getElementById('audioPlayer');
+const audioListEl       = document.getElementById('audioList');
+const sidebarAudioPlayer = document.getElementById('sidebarAudioPlayer');
 
 let lastRetrievedChunks = [];
 const isMobile = () => window.innerWidth <= 768;
@@ -946,6 +1055,126 @@ async function clearConversation() {
   citationList.innerHTML = '';
   railSub.textContent = 'Click a citation in an answer to jump here.';
 }
+
+/* =========================================================
+   AUDIO OVERVIEW
+   ========================================================= */
+const audioCache = [];
+
+audioOverviewBtn.addEventListener('click', () => {
+  audioTopicInput.value = '';
+  audioStatus.textContent = '';
+  audioStatus.classList.add('hidden');
+  audioStatus.classList.remove('error');
+  audioPlayer.classList.add('hidden');
+  audioPlayer.src = '';
+  audioModalOverlay.classList.remove('hidden');
+  audioTopicInput.focus();
+});
+audioModalClose.addEventListener('click', closeAudioModal);
+audioModalOverlay.addEventListener('click', e => {
+  if (e.target === audioModalOverlay) closeAudioModal();
+});
+function closeAudioModal() {
+  audioModalOverlay.classList.add('hidden');
+  audioPlayer.pause();
+}
+
+function renderAudioList() {
+  if (!audioCache.length) {
+    audioListEl.innerHTML = '<div class="empty-audio">No audio generated yet.</div>';
+    sidebarAudioPlayer.classList.add('hidden');
+    sidebarAudioPlayer.pause();
+    return;
+  }
+  audioListEl.innerHTML = audioCache.map((item, i) => `
+    <div class="audio-cache-card" data-idx="${i}">
+      <button class="del" title="Remove audio">✕</button>
+      <div class="topic">${escHtml(item.topic)}</div>
+      <div class="meta">${item.mode === 'podcast' ? 'Podcast' : 'Narrator'}</div>
+    </div>
+  `).join('');
+  audioListEl.querySelectorAll('.audio-cache-card').forEach(card => {
+    card.addEventListener('click', e => {
+      if (e.target.closest('.del')) return;
+      const idx = parseInt(card.dataset.idx);
+      playSidebarAudio(idx);
+    });
+  });
+  audioListEl.querySelectorAll('.del').forEach(btn => {
+    btn.addEventListener('click', e => {
+      const card = e.target.closest('.audio-cache-card');
+      const idx = parseInt(card.dataset.idx);
+      audioCache.splice(idx, 1);
+      renderAudioList();
+    });
+  });
+}
+
+function playSidebarAudio(idx) {
+  const item = audioCache[idx];
+  if (!item) return;
+  audioListEl.querySelectorAll('.audio-cache-card').forEach(c => c.classList.remove('playing'));
+  const card = audioListEl.querySelector(`[data-idx="${idx}"]`);
+  if (card) card.classList.add('playing');
+  sidebarAudioPlayer.src = item.url;
+  sidebarAudioPlayer.classList.remove('hidden');
+  sidebarAudioPlayer.play();
+}
+
+audioGenerateBtn.addEventListener('click', async () => {
+  const apiKey = geminiApiKeyInput.value.trim();
+  const topic = audioTopicInput.value.trim();
+  const sourceCards = sourcesList.querySelectorAll('.source-card');
+  function showAudioError(msg) {
+    audioStatus.textContent = msg;
+    audioStatus.classList.remove('hidden');
+    audioStatus.classList.add('error');
+  }
+  if (!sourceCards.length) {
+    showAudioError('No sources uploaded. Please add at least one document before generating audio.');
+    return;
+  }
+  if (!topic) {
+    showAudioError('Please enter a topic or question for the audio to focus on.');
+    audioTopicInput.focus();
+    return;
+  }
+  if (!apiKey) {
+    showAudioError('Enter a Gemini API key in the left panel first.');
+    return;
+  }
+  const mode = document.querySelector('input[name="audioMode"]:checked').value;
+  audioGenerateBtn.disabled = true;
+  audioPlayer.classList.add('hidden');
+  audioStatus.classList.remove('hidden', 'error');
+  audioStatus.textContent = mode === 'podcast'
+    ? 'Writing podcast script and synthesising audio… this may take a minute or two.'
+    : 'Writing narrator script and synthesising audio… this may take 30–60 seconds.';
+  try {
+    const res = await fetch('/api/audio/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ notebook: notebook(), mode, topic, gemini_api_key: apiKey }),
+    });
+    const data = await res.json();
+    if (data.status !== 'success') {
+      audioStatus.textContent = data.message;
+      audioStatus.classList.add('error');
+      return;
+    }
+    audioPlayer.src = data.audio_url;
+    audioPlayer.classList.remove('hidden');
+    audioStatus.textContent = 'Ready to play.';
+    audioCache.push({ topic, mode, url: data.audio_url });
+    renderAudioList();
+  } catch (e) {
+    audioStatus.textContent = 'Network error: ' + e.message;
+    audioStatus.classList.add('error');
+  } finally {
+    audioGenerateBtn.disabled = false;
+  }
+});
 
 /* =========================================================
    INIT

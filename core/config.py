@@ -33,3 +33,9 @@ UPLOAD_FOLDER = os.getenv("UPLOAD_FOLDER", "./uploads")
 
 # ---- LLM (generation) ----
 GEMINI_MODEL_NAME = os.getenv("GEMINI_MODEL_NAME", "gemini-2.5-flash")
+
+# ---- Audio generation ----
+AUDIO_CACHE_DIR = os.getenv("AUDIO_CACHE_DIR", "./audio_cache")
+AUDIO_VOICE_HOST_A = os.getenv("AUDIO_VOICE_HOST_A", "en-US-GuyNeural")
+AUDIO_VOICE_HOST_B = os.getenv("AUDIO_VOICE_HOST_B", "en-US-JennyNeural")
+AUDIO_VOICE_NARRATOR = os.getenv("AUDIO_VOICE_NARRATOR", "en-US-AriaNeural")
