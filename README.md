@@ -66,6 +66,13 @@ docker compose up --build
 python app.py            # in one terminal
 python test_app.py       # in another
 ```
-## deployment
-- The site is live on [my-notebook](https://my-notebook.up.railway.app)
+
+## Demo
+
+[![Demo Preview](static/demo.gif)](static/demo.mp4)
+
+- 🎬 **[Watch Demo Video (MP4)](static/demo.mp4)**
+- 🎧 **[Listen to Sample Audio Overview (MP3)](static/audio_generated.mp3)**
+
+
 
