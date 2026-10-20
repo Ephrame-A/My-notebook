@@ -1,18 +1,19 @@
-"""
-Vector store
-============
-Thin wrapper around ChromaDB (a local, file-based vector database). Handles
-storing chunk text + embeddings + metadata, and dense (semantic) retrieval.
-"""
+"""Vector store facade for local Chroma and hosted Supabase Postgres."""
 
 from typing import List, Dict, Any
-import chromadb
-from core.config import CHROMA_DB_PATH
+from core.config import CHROMA_DB_PATH, RAG_MODE
+
+if RAG_MODE == "hosted":
+    from core import supabase_store
+else:
+    import chromadb
 
 _client = None
 
 
 def get_client():
+    if RAG_MODE == "hosted":
+        raise RuntimeError("Chroma is not used in hosted mode.")
     global _client
     if _client is None:
         _client = chromadb.PersistentClient(path=CHROMA_DB_PATH)
@@ -20,7 +21,14 @@ def get_client():
 
 
 def add_chunks(collection_name: str, chunk_ids: List[str], chunks: List[str],
-                embeddings: List[List[float]], source: str) -> None:
+                embeddings: List[List[float]], source: str,
+                fingerprint: str = "") -> None:
+    if RAG_MODE == "hosted":
+        supabase_store.add_chunks(collection_name, chunk_ids, chunks, embeddings, source,
+                                  fingerprint)
+        from core.bm25 import invalidate_bm25
+        invalidate_bm25(collection_name)
+        return
     collection = get_client().get_or_create_collection(collection_name)
     collection.add(
         ids=chunk_ids,
@@ -28,11 +36,21 @@ def add_chunks(collection_name: str, chunk_ids: List[str], chunks: List[str],
         embeddings=embeddings,
         metadatas=[{"source": source} for _ in chunks],
     )
+    from core.bm25 import invalidate_bm25
+    invalidate_bm25(collection_name)
+
+
+def cached_source_count(collection_name: str, source: str, fingerprint: str) -> int:
+    if RAG_MODE == "hosted":
+        return supabase_store.cached_source_count(collection_name, source, fingerprint)
+    return 0
 
 
 def get_all_chunks(collection_name: str) -> Dict[str, Any]:
     """Returns every chunk currently stored in a collection (used to build
     the BM25 index and to inspect the knowledge base)."""
+    if RAG_MODE == "hosted":
+        return supabase_store.get_all_chunks(collection_name)
     try:
         collection = get_client().get_collection(collection_name)
     except Exception:
@@ -47,6 +65,8 @@ def get_all_chunks(collection_name: str) -> Dict[str, Any]:
 
 def dense_search(collection_name: str, query_embedding: List[float], top_k: int) -> Dict[str, Any]:
     """Returns the top_k nearest chunks by cosine distance."""
+    if RAG_MODE == "hosted":
+        return supabase_store.dense_search(collection_name, query_embedding, top_k)
     try:
         collection = get_client().get_collection(collection_name)
     except Exception:
@@ -59,10 +79,17 @@ def dense_search(collection_name: str, query_embedding: List[float], top_k: int)
 
 
 def list_collections() -> List[str]:
+    if RAG_MODE == "hosted":
+        return supabase_store.list_collections()
     return [c.name for c in get_client().list_collections()]
 
 
 def delete_collection(collection_name: str) -> None:
+    if RAG_MODE == "hosted":
+        supabase_store.delete_collection(collection_name)
+        from core.bm25 import invalidate_bm25
+        invalidate_bm25(collection_name)
+        return
     try:
         get_client().delete_collection(collection_name)
     except Exception:
@@ -85,6 +112,11 @@ def list_sources(collection_name: str) -> List[Dict[str, Any]]:
 def delete_source(collection_name: str, source: str) -> int:
     """Deletes every chunk belonging to a single source document. Returns
     the number of chunks removed."""
+    if RAG_MODE == "hosted":
+        removed = supabase_store.delete_source(collection_name, source)
+        from core.bm25 import invalidate_bm25
+        invalidate_bm25(collection_name)
+        return removed
     try:
         collection = get_client().get_collection(collection_name)
     except Exception:
@@ -93,4 +125,6 @@ def delete_source(collection_name: str, source: str) -> int:
     ids = result.get("ids", [])
     if ids:
         collection.delete(ids=ids)
+        from core.bm25 import invalidate_bm25
+        invalidate_bm25(collection_name)
     return len(ids)

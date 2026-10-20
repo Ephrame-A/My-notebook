@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>My Notebook — AI-powered document assistant</title>
-<meta name="description" content="My Notebook: upload documents and ask questions grounded in your own sources, with citations you can verify.">
+<title>Marginal — a place to think with your sources</title>
+<meta name="description" content="Marginal is a quiet workspace for asking questions of your documents, tracing answers to their sources, and listening to new ideas.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -549,23 +549,206 @@ body{
   .shell.left-closed .sources-rail{min-width:0;padding:0;opacity:0;overflow:hidden;}
   .shell.right-closed .citation-rail{min-width:0;padding:0;opacity:0;overflow:hidden;}
 }
+
+/* =========================================================
+   MARGINAL STUDIO — editorial finish
+   ========================================================= */
+:root{
+  --ink:#172924;
+  --ink-soft:#20372f;
+  --paper:#f6f3eb;
+  --paper-card:#fffcf5;
+  --paper-line:#e4dfd2;
+  --brass:#dc783d;
+  --brass-light:#f6a669;
+  --brass-soft:#f9e6d8;
+  --sage:#638473;
+  --ink-text:#23332b;
+  --muted:#8a8d81;
+  --rail-w:280px;
+  --cite-w:302px;
+}
+body{background:var(--paper);}
+button,input,textarea{font:inherit;}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--brass);outline-offset:3px;}
+button{touch-action:manipulation;}
+.brand-period,.hero-period{color:var(--brass);}
+.shell{min-height:0;}
+.sources-rail{padding:27px 19px 20px;background:radial-gradient(circle at 0 0,#284339 0,transparent 38%),var(--ink);}
+.brand{align-items:center;gap:12px;margin-bottom:5px;}
+.brand .mark{width:20px;height:20px;border-radius:5px;position:relative;box-shadow:0 0 0 5px rgba(220,120,61,.09);}
+.brand .mark:after{content:'';position:absolute;width:8px;height:8px;border-radius:2px;background:var(--ink);top:6px;left:6px;}
+.brand h1{font-family:'Fraunces',serif;font-size:24px;letter-spacing:-1.2px;}
+.brand-sub{margin:0 0 37px 32px;color:#a9b7a8;font-size:11px;letter-spacing:.01em;}
+.rail-section-heading{display:flex;align-items:center;gap:10px;color:#8da597;font:10px 'IBM Plex Mono',monospace;letter-spacing:1.5px;margin:0 2px 20px;}
+.rail-heading-line{height:1px;flex:1;background:#466052;}
+.notebook-label{display:block;color:#b3c6b8;font:10px 'IBM Plex Mono',monospace;letter-spacing:1.1px;margin:0 0 9px 3px;}
+.notebook-name{font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:600;background:#294338;border:1px solid #456154;border-radius:9px;padding:12px 13px;margin-bottom:12px;color:#f8f5ed;}
+.notebook-name:focus,.api-key-input:focus{border-color:var(--brass-light);}
+.add-source-btn{justify-content:flex-start;gap:10px;padding:12px 15px;border-radius:9px;margin-bottom:28px;font-size:12.5px;box-shadow:0 5px 16px rgba(0,0,0,.12);}
+.add-source-btn .button-arrow{margin-left:auto;font-size:16px;font-weight:400;}
+.rail-label{display:flex;align-items:center;justify-content:space-between;color:#c2cbbf;font:10px 'IBM Plex Mono',monospace;letter-spacing:1.4px;text-transform:uppercase;margin-bottom:13px;}
+.section-count{color:#e5a076;background:#344c3f;border:1px solid #496455;padding:2px 6px;border-radius:4px;letter-spacing:0;}
+.source-card,.audio-cache-card{background:#254034;border:1px solid #3e594a;border-left:2px solid var(--brass);border-radius:8px;padding:12px;margin-bottom:8px;}
+.source-card .fname,.audio-cache-card .topic{font-size:12px;color:#f5f4e9;}
+.source-card .meta,.audio-cache-card .meta{color:#9ab1a1;margin-top:5px;}
+.empty-sources,.empty-audio{border:1px dashed #51695a;border-radius:8px;color:#a5b3a5;font-style:normal;line-height:1.55;padding:14px 12px;}
+.api-key-block{border-top:1px solid #456052;padding-top:18px;margin-top:26px;}
+.api-key-label{color:#bdcbbd;font:10px 'IBM Plex Mono',monospace;letter-spacing:1.2px;margin-bottom:9px;}
+.api-key-input{background:#294338;border:1px solid #456154;border-radius:8px;padding:11px 12px;}
+.api-key-hint{color:#a4b5a5;line-height:1.65;margin-top:9px;}
+.api-key-hint a{color:#f4ad7b;}
+.chat-col{background:var(--paper);}
+.chat-header{min-height:77px;padding:15px 25px;background:rgba(255,252,245,.86);backdrop-filter:blur(14px);}
+.chat-header-left{gap:13px;}
+.chat-header h2{font-size:17px;letter-spacing:-.3px;color:var(--ink);}
+.chat-header .sub{font-size:10.5px;color:#8c968b;margin-top:3px;}
+.sidebar-toggle{border-color:#deded2;color:#5c7765;width:32px;height:32px;border-radius:8px;}
+.clear-btn{padding:8px 9px;color:#748077;border-radius:7px;}
+.audio-btn{display:flex;align-items:center;gap:7px;border:1px solid #edc5a8;background:#fff4e8;color:#aa552d;border-radius:8px;padding:9px 12px;font-size:11.5px;font-weight:600;white-space:nowrap;}
+.audio-btn:hover{background:var(--brass);color:white;}
+#dashboardView{padding:0;min-height:0;background:radial-gradient(circle at 70% 26%,#fcf8ed 0,transparent 42%),var(--paper);}
+.dashboard-inner{width:min(100%,1000px);margin:0 auto;padding:38px 45px 24px;}
+.hero-label,.suggestions-heading,.dashboard-footer{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:1.25px;color:#89998b;}
+.hero-label{display:flex;align-items:center;gap:9px;white-space:nowrap;}
+.hero-label-dot{width:6px;height:6px;border-radius:50%;background:var(--brass);box-shadow:0 0 0 4px #f6e3d5;}
+.hero-label-rule{width:25px;height:1px;background:#c9d0c5;}
+.dash-hero{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(235px,.9fr);align-items:center;text-align:left;max-width:none;min-height:370px;padding:18px 0 5px;gap:5px;}
+.hero-copy{position:relative;z-index:2;padding:14px 0 12px;}
+.hero-eyebrow{font:10px 'IBM Plex Mono',monospace!important;letter-spacing:2px;color:var(--brass)!important;margin:0 0 17px!important;}
+.dash-hero h2{font-size:clamp(30px,3vw,48px);line-height:1.08;font-weight:500;letter-spacing:-2.4px;color:var(--ink);margin:0 0 22px;}
+.dash-hero h2 em{font-weight:400;color:var(--brass);}
+.hero-description{max-width:370px!important;font-size:13px!important;line-height:1.8!important;color:#6d786e!important;margin-bottom:27px!important;}
+.hero-actions{display:flex;align-items:center;gap:18px;flex-wrap:wrap;}
+.dash-start-btn{margin:0;border-radius:8px;background:var(--ink);padding:12px 17px;font-size:12px;box-shadow:0 7px 18px rgba(23,41,36,.15);}
+.dash-start-btn span{font-size:16px;margin-left:14px;font-weight:400;}
+.hero-secondary{background:none;border:none;color:#395d48;font-size:12px;font-weight:600;cursor:pointer;border-bottom:1px solid #8fa793;padding:8px 0;}
+.hero-secondary span{margin-left:10px;color:var(--brass);font-size:17px;vertical-align:-1px;}
+.hero-art{height:342px;position:relative;overflow:hidden;}
+.art-orbit{position:absolute;border:1px solid #e5e1d3;border-radius:50%;left:50%;top:49%;transform:translate(-50%,-50%);}
+.orbit-one{width:296px;height:296px;}.orbit-two{width:226px;height:226px;}
+.art-page{position:absolute;background:#fffdf6;border:1px solid #e7e0d0;box-shadow:0 18px 35px rgba(39,57,45,.13);border-radius:3px;}
+.art-page-back{width:175px;height:236px;top:44px;left:calc(50% - 81px);transform:rotate(15deg);padding:72px 20px;}
+.art-page-front{width:195px;height:254px;top:47px;left:calc(50% - 112px);transform:rotate(-10deg);padding:20px 19px;}
+.art-page-label{display:block;font:8px 'IBM Plex Mono',monospace;letter-spacing:1.2px;color:#8b9889;border-bottom:1px solid #e8e2d6;padding-bottom:9px;}
+.art-page-title{display:block;font:24px/1.14 'Fraunces',serif;color:var(--ink);margin:20px 0 18px;letter-spacing:-.6px;}
+.art-page-title i{font-style:italic;color:var(--brass);}
+.art-page-line{display:block;height:3px;background:#e9e9de;border-radius:3px;margin:0 0 8px;width:79%;}
+.art-page-line.long{width:100%;}.art-page-line.medium{width:62%;}.art-page-line.short{width:44%;}
+.art-annotation{position:absolute;right:18px;bottom:18px;font:9px 'IBM Plex Mono',monospace;color:var(--brass);}
+.art-spark{position:absolute;color:var(--brass);font-size:29px;line-height:1;}
+.spark-one{right:4%;top:32px;}.spark-two{left:8%;bottom:55px;font-size:18px;color:#7b9781;}
+.art-note{position:absolute;right:0;bottom:26px;transform:rotate(4deg);background:#f9e9cf;color:#a8673f;font:8px 'IBM Plex Mono',monospace;letter-spacing:.8px;padding:10px 12px;box-shadow:0 7px 15px rgba(43,58,41,.1);}
+.art-note span{margin-left:14px;font-size:12px;}
+.suggestions-heading{display:flex;justify-content:space-between;gap:10px;border-top:1px solid #dcded2;padding-top:20px;margin:5px 0 13px;color:#597264;}
+.suggestions-heading span:last-child{color:#a0aaa0;}
+.prompt-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;}
+.prompt-card{position:relative;min-width:0;display:flex;align-items:flex-start;gap:10px;text-align:left;background:var(--paper-card);border:1px solid #e5e3d7;border-radius:9px;padding:16px 13px;cursor:pointer;transition:transform .2s,box-shadow .2s,border-color .2s;}
+.prompt-card:hover{transform:translateY(-3px);box-shadow:0 10px 25px rgba(40,65,49,.08);border-color:#d5b79c;}
+.prompt-icon{display:grid;place-items:center;width:27px;height:27px;flex:none;background:#f5e5d6;color:#bd7144;border-radius:7px;font-size:18px;}
+.prompt-copy{display:flex;flex-direction:column;gap:5px;min-width:0;padding-top:2px;}
+.prompt-copy strong{font:500 13px 'Fraunces',serif;color:var(--ink);}
+.prompt-copy small{font-size:10px;color:#929c91;line-height:1.45;}
+.prompt-arrow{position:absolute;right:11px;top:14px;font-size:12px;color:#b8bfb3;}
+.dashboard-footer{display:flex;align-items:center;gap:10px;margin-top:24px;color:#a1a99e;font-size:8px;white-space:nowrap;}
+.dashboard-footer>span:first-child{color:var(--brass);font-size:14px;}.footer-rule{height:1px;background:#dedfd3;flex:1;}
+.composer{padding:13px 25px 14px;background:rgba(255,252,245,.9);}
+.settings-toggle{background:none;border:0;padding:0;display:inline-flex;gap:5px;align-items:center;color:#738577;font:10px 'IBM Plex Mono',monospace;letter-spacing:.25px;}
+.settings-toggle:hover{color:var(--ink);}
+.input-row{align-items:stretch;gap:9px;}
+#queryInput{min-height:47px;border-radius:9px;padding:12px 13px;background:white;border-color:#dce0d5;box-shadow:0 2px 7px rgba(25,52,35,.025);}
+.send-btn{border-radius:9px;padding:10px 17px;background:var(--ink);font-size:12px;}
+.send-btn span{font-size:16px;margin-left:9px;}
+.composer-footnote{display:flex;gap:13px;color:#a4aca1;font:9px 'IBM Plex Mono',monospace;margin-top:9px;}
+.composer-grounded{margin-left:auto;color:#809481;}
+.thread{padding:26px 35px;gap:20px;}
+.msg{max-width:82%;}
+.msg.user .bubble{background:var(--ink);}
+.msg.assistant .bubble{box-shadow:0 4px 18px rgba(26,54,36,.04);}
+.citation-rail{padding:27px 19px;background:#f0eee6;}
+.inspector-kicker{display:flex;justify-content:space-between;align-items:center;color:#8da08f;font:9px 'IBM Plex Mono',monospace;letter-spacing:1.4px;margin-bottom:32px;}
+.inspector-kicker span{font-size:16px;color:var(--brass);}
+.citation-rail h3{font-size:25px;letter-spacing:-.9px;color:var(--ink);margin-bottom:6px;}
+.citation-rail .sub{font-size:11px;line-height:1.5;color:#8d9b8e;}
+.chunk-card{background:#fffdf8;border-left-color:var(--brass);border-radius:7px;box-shadow:0 3px 10px rgba(27,51,33,.03);}
+.inspector-empty{position:relative;margin-top:36px;border-top:1px solid #d8dcd0;padding:24px 4px;min-height:244px;overflow:hidden;}
+.inspector-empty-glyph{display:block;font:68px/.8 'Fraunces',serif;color:#dda979;}
+.inspector-empty p{font:500 20px/1.25 'Fraunces',serif;color:#526d58;margin:15px 0 10px;}
+.inspector-empty small{display:block;max-width:190px;color:#91a094;line-height:1.5;font-size:10.5px;}
+.inspector-empty-flower{position:absolute;right:0;bottom:3px;font-size:85px;color:#dfe6da;line-height:1;}
+.inspector-empty.hidden{display:none;}
+.chunk-card .src{overflow-wrap:anywhere;text-align:right;max-width:70%;}
+.cite-chip{vertical-align:baseline;line-height:1;}
+.drop-overlay{position:fixed;inset:12px;z-index:150;display:none;align-items:center;justify-content:center;pointer-events:none;border:2px dashed var(--brass);border-radius:18px;background:rgba(246,243,235,.94);box-shadow:0 0 0 12px rgba(23,41,36,.27);color:var(--ink);font:500 26px 'Fraunces',serif;text-align:center;}
+.drop-overlay.show{display:flex;}
+.drop-overlay span{display:block;color:var(--brass);font:11px 'IBM Plex Mono',monospace;letter-spacing:1.5px;margin-top:8px;}
+.upload-progress.done .upload-spinner{animation:none;background:var(--sage);border-color:var(--sage);display:grid;place-items:center;}
+.upload-progress.error .upload-spinner{background:var(--danger);border-color:var(--danger);}
+.upload-progress.done .upload-spinner:after{content:'✓';font-size:11px;font-weight:700;color:#fff;}
+.upload-progress.error .upload-spinner:after{content:'!';}
+.audio-modal{background:var(--paper-card);border-radius:16px;box-shadow:0 24px 70px rgba(17,37,28,.24);}
+@media(max-width:1200px) and (min-width:769px){
+  :root{--rail-w:245px;--cite-w:260px;}
+  .dashboard-inner{padding:30px 28px 24px;}
+  .dash-hero{grid-template-columns:1fr;min-height:0;padding:30px 0 34px;}
+  .dash-hero h2{font-size:40px;}
+  .hero-art{display:none;}
+  .prompt-grid{grid-template-columns:1fr;}
+  .prompt-card{align-items:center;padding:11px 13px;}
+  .prompt-copy{flex-direction:row;align-items:baseline;gap:8px;}
+}
+@media(max-width:768px){
+  .sources-rail,.citation-rail{width:min(85vw,330px);max-width:330px;}
+  .sources-rail{min-width:0;}.citation-rail{min-width:0;}
+  .chat-header{padding:12px 13px;min-height:65px;}
+  .chat-header h2{font-size:15px;}
+  .chat-header .sub{font-size:10px;}
+  .header-actions{gap:5px;}
+  .audio-btn{font-size:0;padding:7px 9px;}
+  .audio-btn span{font-size:19px;}
+  .clear-btn{font-size:0;padding:7px;}
+  .clear-btn:after{content:'⌫';font-size:17px;line-height:1;}
+  .dashboard-inner{padding:28px 22px 25px;}
+  .dash-hero{display:block;padding:30px 0 29px;min-height:0;}
+  .dash-hero h2{font-size:clamp(32px,7vw,47px);letter-spacing:-1.7px;white-space:normal;}
+  .hero-art{display:none;}
+  .hero-description{font-size:12.5px!important;}
+  .prompt-grid{grid-template-columns:1fr;}
+  .prompt-card{padding:13px 14px;}
+  .dashboard-footer{font-size:7px;}
+  .composer{padding:11px 14px 12px;}
+  .composer-grounded{display:none;}
+  .thread{padding:20px 16px;}.msg{max-width:93%;}
+}
+@media(max-width:390px){
+  .hero-label{font-size:8px;letter-spacing:.5px;}
+  .hero-label-rule{width:10px;}
+  .dash-hero h2{font-size:31px;}
+  .hero-actions{gap:11px;}
+  .dash-start-btn{padding:11px 13px;}
+  .chat-header-left{gap:7px;}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important;}
+}
 </style>
 </head>
-<body>
+<body data-rag-mode="{{ rag_mode }}">
 
 <!-- Page-load splash -->
 <div id="splash">
   <div class="splash-logo">
-    <span class="splash-mark"></span>My Notebook
+    <span class="splash-mark"></span>Marginal<span class="brand-period">.</span>
   </div>
   <div class="splash-sub">Loading your workspace…</div>
 </div>
 
 <!-- Mobile overlay backdrop -->
 <div class="overlay" id="overlay"></div>
+<div class="drop-overlay" id="dropOverlay" aria-hidden="true"><div>Drop your sources here<span>PDF · TXT · MARKDOWN</span></div></div>
 
 <!-- Upload progress toast -->
-<div class="upload-progress" id="uploadToast">
+<div class="upload-progress" id="uploadToast" role="status" aria-live="polite">
   <div class="upload-spinner"></div>
   <span id="uploadToastLabel">Indexing documents…</span>
 </div>
@@ -576,22 +759,25 @@ body{
   <aside class="sources-rail rail" id="sourcesRail">
     <div class="brand">
       <span class="mark"></span>
-      <h1>My Notebook</h1>
+      <h1>Marginal<span class="brand-period">.</span></h1>
     </div>
-    <p class="brand-sub">your personal document assistant</p>
+    <p class="brand-sub">A space for deeper thinking</p>
+
+    <div class="rail-section-heading">YOUR WORKSPACE <span class="rail-heading-line"></span></div>
+    <label class="notebook-label" for="notebookName">ACTIVE NOTEBOOK</label>
 
     <input class="notebook-name" id="notebookName" value="{{ default_notebook }}" spellcheck="false" placeholder="Notebook name…">
 
     <button class="add-source-btn" id="addSourceBtn">
       <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-      Add source
+      Add a source <span class="button-arrow" aria-hidden="true">↗</span>
     </button>
     <input type="file" id="fileInput" multiple accept=".pdf,.txt,.md">
 
-    <div class="rail-label">Sources</div>
+    <div class="rail-label">Sources <span class="section-count" id="sourceBadge">00</span></div>
     <div id="sourcesList"></div>
 
-    <div class="rail-label" style="margin-top:14px">Audio</div>
+    <div class="rail-label" style="margin-top:22px">Audio overviews <span class="section-count" id="audioBadge">00</span></div>
     <div id="audioList"><div class="empty-audio">No audio generated yet.</div></div>
     <audio id="sidebarAudioPlayer" class="audio-sidebar-player hidden" controls></audio>
 
@@ -600,11 +786,11 @@ body{
       <input class="api-key-input" id="geminiApiKey" type="password"
              placeholder="AIza…" autocomplete="off" spellcheck="false">
       <p class="api-key-hint">
-        Never stored — sent only per request.<br>
+        Never stored — sent only per request.{% if rag_mode == 'hosted' %} Needed for uploads and questions.{% endif %}<br>
         <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Get a free key →</a>
       </p>
       <div class="api-key-banner" id="apiKeyBanner">
-        ⚠ Enter a Gemini API key above before asking.
+        ⚠ Enter a Gemini API key above before {% if rag_mode == 'hosted' %}uploading or {% endif %}asking.
       </div>
     </div>
   </aside>
@@ -615,12 +801,12 @@ body{
       <div class="chat-header-left">
         <button class="sidebar-toggle" id="toggleLeft" title="Toggle sources panel" aria-label="Toggle sources panel">☰</button>
         <div>
-          <h2>Conversation</h2>
-          <p class="sub" id="sourceCountLabel">0 sources loaded</p>
+          <h2>Notebook studio</h2>
+          <p class="sub" id="sourceCountLabel" aria-live="polite">0 sources loaded</p>
         </div>
       </div>
       <div class="header-actions">
-        <button class="audio-btn" id="audioOverviewBtn" title="Generate audio overview">&#9654; Audio Overview</button>
+        <button class="audio-btn" id="audioOverviewBtn" title="Generate audio overview"><span aria-hidden="true">♫</span> Audio overview</button>
         <button class="clear-btn" id="clearChatBtn">Clear conversation</button>
         <button class="sidebar-toggle" id="toggleRight" title="Toggle citations panel" aria-label="Toggle citations panel">⊞</button>
       </div>
@@ -628,34 +814,40 @@ body{
 
     <!-- Dashboard view (shown when thread is empty) -->
     <div id="dashboardView">
-      <div class="dash-hero">
-        <span class="dash-glyph">§</span>
-        <h2>Welcome to My Notebook</h2>
-        <p>Upload your documents, ask questions, or generate audio overviews. Every answer is grounded in your sources with citations you can click to verify — like having a research assistant that only knows what you've taught it.</p>
+      <div class="dashboard-inner">
+        <div class="hero-label"><span class="hero-label-dot"></span> YOUR RESEARCH COMPANION <span class="hero-label-rule"></span> 01 / STUDIO</div>
+        <div class="dash-hero">
+          <div class="hero-copy">
+            <p class="hero-eyebrow">IDEAS BEGIN AT THE MARGIN</p>
+            <h2>Make sense of<br><em>everything</em><br>you read<span class="hero-period">.</span></h2>
+            <p class="hero-description">Bring your documents together. Ask better questions. Follow every answer back to the passage that inspired it.</p>
+            <div class="hero-actions">
+              <button class="dash-start-btn" id="dashStartBtn">Start exploring <span aria-hidden="true">↗</span></button>
+              <button class="hero-secondary" id="heroAddSourceBtn">Add sources <span aria-hidden="true">＋</span></button>
+            </div>
+          </div>
+          <div class="hero-art" aria-hidden="true">
+            <div class="art-orbit orbit-one"></div><div class="art-orbit orbit-two"></div>
+            <div class="art-page art-page-back"><span class="art-page-line long"></span><span class="art-page-line"></span><span class="art-page-line short"></span></div>
+            <div class="art-page art-page-front">
+              <span class="art-page-label">FIELD NOTES / 001</span>
+              <span class="art-page-title">A new way<br>to connect<br><i>the dots.</i></span>
+              <span class="art-page-line long"></span><span class="art-page-line"></span><span class="art-page-line medium"></span>
+              <span class="art-annotation">[ 01 ]</span>
+            </div>
+            <div class="art-spark spark-one">✳</div><div class="art-spark spark-two">✳</div>
+            <div class="art-note">INSIGHT, WITH A SOURCE <span>↗</span></div>
+          </div>
+        </div>
+
+        <div class="suggestions-heading"><span>START WITH A QUESTION</span><span>OR MAKE IT YOUR OWN ↓</span></div>
+        <div class="prompt-grid">
+          <button class="prompt-card" data-prompt="Summarize the main ideas across my sources."><span class="prompt-icon">↗</span><span class="prompt-copy"><strong>Find the big picture</strong><small>Summarize the main ideas across my sources</small></span><span class="prompt-arrow">↗</span></button>
+          <button class="prompt-card" data-prompt="What are the most important details I should know?"><span class="prompt-icon">✳</span><span class="prompt-copy"><strong>Spot the details</strong><small>Surface what matters most</small></span><span class="prompt-arrow">↗</span></button>
+          <button class="prompt-card" data-prompt="Where do my sources agree or disagree?"><span class="prompt-icon">≋</span><span class="prompt-copy"><strong>Connect the dots</strong><small>Compare ideas across documents</small></span><span class="prompt-arrow">↗</span></button>
+        </div>
+        <div class="dashboard-footer"><span>✦</span> ANSWERS GROUNDED IN YOUR SOURCES <span class="footer-rule"></span> MADE FOR CURIOUS MINDS</div>
       </div>
-      <div class="dash-steps">
-        <div class="step-card">
-          <span class="step-num">01</span>
-          <h3>Add your sources</h3>
-          <p>Upload PDFs, text files, or Markdown documents using the panel on the left.</p>
-        </div>
-        <div class="step-card">
-          <span class="step-num">02</span>
-          <h3>Enter your API key</h3>
-          <p>Paste your free Gemini API key at the bottom-left. It's never stored — only used per request.</p>
-        </div>
-        <div class="step-card">
-          <span class="step-num">03</span>
-          <h3>Ask anything</h3>
-          <p>Type a question below. Answers cite numbered sources you can click to inspect.</p>
-        </div>
-        <div class="step-card">
-          <span class="step-num">04</span>
-          <h3>Listen to it</h3>
-          <p>Click Audio Overview to generate a podcast or narrator summary you can listen to in your browser.</p>
-        </div>
-      </div>
-      <button class="dash-start-btn" id="dashStartBtn">Start asking →</button>
     </div>
 
     <!-- Thread view -->
@@ -664,7 +856,7 @@ body{
     </div>
 
     <div class="composer">
-      <span class="settings-toggle" id="settingsToggle">Retrieval settings ▾</span>
+      <button class="settings-toggle" id="settingsToggle" type="button" aria-expanded="false">Retrieval settings <span aria-hidden="true">⌄</span></button>
       <div class="settings-panel" id="settingsPanel">
         <div class="field">
           <label>Results per question</label>
@@ -684,17 +876,20 @@ body{
         </div>
       </div>
       <div class="input-row">
-        <textarea id="queryInput" rows="1" placeholder="Ask something about your sources…"></textarea>
-        <button class="send-btn" id="sendBtn">Ask</button>
+        <textarea id="queryInput" rows="1" placeholder="Ask anything about your sources…" aria-label="Ask about your sources"></textarea>
+        <button class="send-btn" id="sendBtn">Ask <span aria-hidden="true">↗</span></button>
       </div>
+      <div class="composer-footnote"><span>↵ Send</span><span>Shift + ↵ New line</span><span class="composer-grounded">✳ Grounded in your sources</span></div>
     </div>
   </main>
 
   <!-- RIGHT: Citations rail -->
   <aside class="citation-rail rail" id="citationRail">
-    <h3>Sources</h3>
+    <div class="inspector-kicker">THE REFERENCE DESK <span>↗</span></div>
+    <h3>Source notes<span class="brand-period">.</span></h3>
     <p class="sub" id="railSub">Click a citation in an answer to jump here.</p>
     <div id="citationList"></div>
+    <div class="inspector-empty" id="inspectorEmpty"><span class="inspector-empty-glyph">“</span><p>Every good answer<br>has a paper trail.</p><small>Your source passages will appear here when you ask a question.</small><span class="inspector-empty-flower">✳</span></div>
   </aside>
 
 </div>
@@ -763,7 +958,12 @@ const geminiApiKeyInput = document.getElementById('geminiApiKey');
 const apiKeyBanner  = document.getElementById('apiKeyBanner');
 const uploadToast   = document.getElementById('uploadToast');
 const uploadToastLabel = document.getElementById('uploadToastLabel');
+const dropOverlay = document.getElementById('dropOverlay');
 const dashStartBtn  = document.getElementById('dashStartBtn');
+const heroAddSourceBtn = document.getElementById('heroAddSourceBtn');
+const sourceBadge = document.getElementById('sourceBadge');
+const audioBadge = document.getElementById('audioBadge');
+const inspectorEmpty = document.getElementById('inspectorEmpty');
 const splash        = document.getElementById('splash');
 const audioOverviewBtn  = document.getElementById('audioOverviewBtn');
 const audioModalOverlay = document.getElementById('audioModalOverlay');
@@ -774,8 +974,10 @@ const audioStatus       = document.getElementById('audioStatus');
 const audioPlayer       = document.getElementById('audioPlayer');
 const audioListEl       = document.getElementById('audioList');
 const sidebarAudioPlayer = document.getElementById('sidebarAudioPlayer');
+const hostedMode = document.body.dataset.ragMode === 'hosted';
 
 let lastRetrievedChunks = [];
+let uploadToastTimer;
 const isMobile = () => window.innerWidth <= 768;
 
 /* =========================================================
@@ -790,16 +992,18 @@ window.addEventListener('load', () => {
    ========================================================= */
 toggleLeft.addEventListener('click', () => {
   if (isMobile()) {
+    citationRail.classList.remove('mobile-open');
     sourcesRail.classList.toggle('mobile-open');
-    overlay.classList.toggle('show');
+    overlay.classList.toggle('show', sourcesRail.classList.contains('mobile-open'));
   } else {
     shell.classList.toggle('left-closed');
   }
 });
 toggleRight.addEventListener('click', () => {
   if (isMobile()) {
+    sourcesRail.classList.remove('mobile-open');
     citationRail.classList.toggle('mobile-open');
-    overlay.classList.toggle('show');
+    overlay.classList.toggle('show', citationRail.classList.contains('mobile-open'));
   } else {
     shell.classList.toggle('right-closed');
   }
@@ -827,11 +1031,20 @@ function showDashboard() {
 dashStartBtn.addEventListener('click', () => {
   queryInput.focus();
 });
+heroAddSourceBtn.addEventListener('click', () => fileInput.click());
+document.querySelectorAll('.prompt-card').forEach(card => {
+  card.addEventListener('click', () => {
+    queryInput.value = card.dataset.prompt;
+    queryInput.dispatchEvent(new Event('input'));
+    queryInput.focus();
+  });
+});
 
 settingsToggle.addEventListener('click', () => {
   settingsPanel.classList.toggle('open');
-  settingsToggle.textContent = settingsPanel.classList.contains('open')
-    ? 'Retrieval settings ▴' : 'Retrieval settings ▾';
+  const open = settingsPanel.classList.contains('open');
+  settingsToggle.setAttribute('aria-expanded', String(open));
+  settingsToggle.innerHTML = `Retrieval settings <span aria-hidden="true">${open ? '⌃' : '⌄'}</span>`;
 });
 alphaSlider.addEventListener('input', () => alphaVal.textContent = alphaSlider.value);
 
@@ -844,9 +1057,32 @@ queryInput.addEventListener('keydown', e => {
 });
 
 addSourceBtn.addEventListener('click', () => fileInput.click());
-fileInput.addEventListener('change', uploadFiles);
+fileInput.addEventListener('change', () => uploadFiles(fileInput.files));
 sendBtn.addEventListener('click', sendMessage);
 clearChatBtn.addEventListener('click', clearConversation);
+notebookInput.addEventListener('change', () => {
+  thread.innerHTML = '';
+  showDashboard();
+  citationList.innerHTML = '';
+  railSub.textContent = 'Click a citation in an answer to jump here.';
+  inspectorEmpty.classList.remove('hidden');
+  loadSources();
+});
+
+window.addEventListener('dragover', e => {
+  if (!Array.from(e.dataTransfer?.types || []).includes('Files')) return;
+  e.preventDefault();
+  dropOverlay.classList.add('show');
+});
+window.addEventListener('dragleave', e => {
+  if (!e.relatedTarget) dropOverlay.classList.remove('show');
+});
+window.addEventListener('drop', e => {
+  dropOverlay.classList.remove('show');
+  if (!e.dataTransfer?.files.length) return;
+  e.preventDefault();
+  uploadFiles(e.dataTransfer.files);
+});
 
 /* =========================================================
    SOURCES
@@ -854,13 +1090,17 @@ clearChatBtn.addEventListener('click', clearConversation);
 async function loadSources() {
   try {
     const res = await fetch(`/api/sources?notebook=${encodeURIComponent(notebook())}`);
+    if (!res.ok) throw new Error('Could not load sources. Check the database connection.');
     const data = await res.json();
     renderSources(data.sources || []);
-  } catch (_) {}
+  } catch (e) {
+    sourcesList.innerHTML = `<div class="empty-sources">${escHtml(e.message)}</div>`;
+  }
 }
 
 function renderSources(sources) {
   sourceCountLabel.textContent = `${sources.length} source${sources.length === 1 ? '' : 's'} loaded`;
+  sourceBadge.textContent = String(sources.length).padStart(2, '0');
   if (!sources.length) {
     sourcesList.innerHTML = '<div class="empty-sources">No sources yet — add a PDF, TXT or MD file.</div>';
     return;
@@ -882,10 +1122,22 @@ function renderSources(sources) {
   });
 }
 
-async function uploadFiles() {
-  const files = fileInput.files;
-  if (!files.length) return;
+async function uploadFiles(files) {
+  if (!files.length || addSourceBtn.disabled) return;
 
+  const apiKey = geminiApiKeyInput.value.trim();
+  if (hostedMode && !apiKey) {
+    apiKeyBanner.style.display = 'block';
+    geminiApiKeyInput.focus();
+    if (isMobile()) {
+      sourcesRail.classList.add('mobile-open');
+      overlay.classList.add('show');
+    }
+    return;
+  }
+
+  clearTimeout(uploadToastTimer);
+  uploadToast.classList.remove('done', 'error');
   uploadToastLabel.textContent = `Indexing ${files.length} file${files.length > 1 ? 's' : ''}…`;
   uploadToast.classList.add('show');
   addSourceBtn.disabled = true;
@@ -893,19 +1145,29 @@ async function uploadFiles() {
   const formData = new FormData();
   for (const f of files) formData.append('files', f);
   formData.append('notebook', notebook());
+  if (hostedMode) formData.append('gemini_api_key', apiKey);
   formData.append('chunk_size', document.getElementById('chunkSize').value);
   formData.append('chunk_overlap', document.getElementById('chunkOverlap').value);
 
   try {
     const res = await fetch('/api/sources/upload', { method: 'POST', body: formData });
     const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Upload failed.');
     renderSources(data.sources || []);
+    const succeeded = (data.results || []).filter(item => item.status === 'success').length;
+    const failed = (data.results || []).filter(item => item.status !== 'success');
+    uploadToastLabel.textContent = failed.length
+      ? `${succeeded} added · ${failed.length} failed: ${failed[0].message || failed[0].filename}`
+      : `${succeeded} source${succeeded === 1 ? '' : 's'} added to your notebook`;
+    uploadToast.classList.add('done');
+    if (failed.length) uploadToast.classList.add('error');
   } catch (e) {
-    alert('Upload failed: ' + e.message);
+    uploadToastLabel.textContent = 'Upload failed: ' + e.message;
+    uploadToast.classList.add('done', 'error');
   } finally {
     addSourceBtn.disabled = false;
     fileInput.value = '';
-    setTimeout(() => uploadToast.classList.remove('show'), 800);
+    uploadToastTimer = setTimeout(() => uploadToast.classList.remove('show'), 3500);
   }
 }
 
@@ -913,7 +1175,7 @@ async function uploadFiles() {
    CHAT
    ========================================================= */
 function escHtml(s) {
-  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 
 function addMessage(role, text, id) {
@@ -947,7 +1209,7 @@ function renderAnswerWithCitations(container, text, chunks) {
   const withChips = escaped.replace(/\[(\d+)\]/g, (match, n) => {
     const num = parseInt(n);
     if (!chunks.some(c => c.citation_number === num)) return match;
-    return `<span class="cite-chip" data-cite="${num}">${num}</span>`;
+    return `<button type="button" class="cite-chip" data-cite="${num}" aria-label="View source ${num}">${num}</button>`;
   });
   container.querySelector('.bubble').innerHTML = withChips;
   container.querySelectorAll('.cite-chip').forEach(chip => {
@@ -957,7 +1219,9 @@ function renderAnswerWithCitations(container, text, chunks) {
 
 function renderCitationRail(chunks) {
   lastRetrievedChunks = chunks;
+  inspectorEmpty.classList.toggle('hidden', chunks.length > 0);
   if (!chunks.length) {
+    railSub.textContent = 'No passages found for this answer.';
     citationList.innerHTML = '<p class="sub">No sources retrieved for the last answer.</p>';
     return;
   }
@@ -1054,6 +1318,7 @@ async function clearConversation() {
   showDashboard();
   citationList.innerHTML = '';
   railSub.textContent = 'Click a citation in an answer to jump here.';
+  inspectorEmpty.classList.remove('hidden');
 }
 
 /* =========================================================
@@ -1075,12 +1340,16 @@ audioModalClose.addEventListener('click', closeAudioModal);
 audioModalOverlay.addEventListener('click', e => {
   if (e.target === audioModalOverlay) closeAudioModal();
 });
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && !audioModalOverlay.classList.contains('hidden')) closeAudioModal();
+});
 function closeAudioModal() {
   audioModalOverlay.classList.add('hidden');
   audioPlayer.pause();
 }
 
 function renderAudioList() {
+  audioBadge.textContent = String(audioCache.length).padStart(2, '0');
   if (!audioCache.length) {
     audioListEl.innerHTML = '<div class="empty-audio">No audio generated yet.</div>';
     sidebarAudioPlayer.classList.add('hidden');

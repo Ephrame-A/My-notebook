@@ -1,6 +1,6 @@
-# My-Notebook — a notebook for your documents
+# Marginal — a place to think with your sources
 
-A self-hosted, NotebookLM-style RAG app: drop in PDFs/text files, chat with
+A NotebookLM-style RAG app: drop in PDFs/text files, chat with
 them, and get answers with clickable numbered citations that jump to the
 exact source passage. Generate audio overviews of your documents — as a
 two-host podcast or a single-narrator summary — powered by Edge-TTS. Hybrid
@@ -27,9 +27,10 @@ retrieval (semantic + keyword) under the hood, fully visible and editable.
 ```
 core/
   chunking.py       recursive character splitter (hand-written, tunable)
-  embeddings.py      local sentence-transformer embeddings
+  embeddings.py      local sentence-transformer or Gemini API embeddings
   bm25.py            keyword search, from-scratch inverted index + BM25
-  vectorstore.py     ChromaDB wrapper: storage, dense search, source grouping/deletion
+  vectorstore.py     ChromaDB or Supabase storage facade
+  supabase_store.py  Supabase Postgres + pgvector storage
   retriever.py       fuses dense + sparse scores (tunable alpha)
   chat_history.py    short rolling conversation memory per notebook
   rag_pipeline.py    ingestion + citation-aware prompt building + LLM call
@@ -59,6 +60,48 @@ cp .env.example .env
 docker compose up --build
 # open http://localhost:5000
 ```
+
+## Free hosted demo: Render + Supabase
+
+The hosted build uses **Supabase Postgres with pgvector** for source passages and
+**Gemini Embedding 2** for 768-dimensional vectors. It does not install PyTorch,
+sentence-transformers, Chroma, or LangChain. The original local stack remains
+the default when `RAG_MODE=local`; its Chroma data is not migrated automatically.
+
+1. Create a Supabase project. In its SQL Editor, run
+   [`sql/supabase.sql`](sql/supabase.sql) once.
+2. In Supabase **Connect**, copy the **Transaction pooler** Postgres URI. Keep
+   this URI private. It is the value for `SUPABASE_DB_URL`.
+3. Push this repository to GitHub and create a Render **Blueprint** from it.
+   [`render.yaml`](render.yaml) selects the small hosted Docker image and free
+   web service. Enter `SUPABASE_DB_URL` when Render prompts you; Render
+   generates `FLASK_SECRET_KEY`. You can also deploy a Docker web service
+   manually using [`Dockerfile.hosted`](Dockerfile.hosted) and set both values.
+4. Open the Render URL. Each tester enters **their own Gemini API key** in the
+   app before uploading a document or asking a question. The key is sent with
+   each request and is not stored by the app. This keeps your own key from
+   covering every tester's embedding and chat usage.
+
+The hosted demo caps files at 5 MB, 80 passages per file, and five sources per
+notebook. Uploading unchanged content under the same filename reuses its saved
+embeddings. A signed browser cookie keeps each tester's notebooks separate;
+there is no login or recovery if they clear that cookie. Source passages stay
+in Supabase, while chat history and generated audio are temporary on Render.
+The free Render service can sleep when idle, so its first request may take time.
+
+To run the hosted profile locally after creating the Supabase table:
+
+```bash
+python -m venv .venv-hosted
+source .venv-hosted/bin/activate
+pip install -r requirements-hosted.txt
+RAG_MODE=hosted SUPABASE_DB_URL='your-postgres-uri' FLASK_SECRET_KEY='a-long-random-secret' SESSION_COOKIE_SECURE=false python app.py
+```
+
+The Gemini embedding model name can be overridden with
+`GEMINI_EMBEDDING_MODEL`, but switching models requires re-embedding sources
+because their vectors are not comparable. The database schema assumes 768
+dimensions.
 
 ## Test
 

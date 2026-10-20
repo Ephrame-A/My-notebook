@@ -9,10 +9,10 @@ content.  Two phases: (1) the LLM writes a script from the stored chunks,
 import os
 import asyncio
 import tempfile
+import subprocess
 from typing import List
 
 import edge_tts
-from pydub import AudioSegment
 
 from core import vectorstore
 from core.rag_pipeline import _call_llm
@@ -20,6 +20,7 @@ from core.config import (
     AUDIO_VOICE_HOST_A,
     AUDIO_VOICE_HOST_B,
     AUDIO_VOICE_NARRATOR,
+    RAG_MODE,
 )
 
 # ---------------------------------------------------------------------------
@@ -137,9 +138,29 @@ async def _synthesise_all(segments: List[tuple]) -> None:
 
 
 def _concat_mp3s(paths: List[str], output_path: str) -> None:
+    if RAG_MODE == "hosted":
+        import imageio_ffmpeg
+
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False) as manifest:
+            manifest_path = manifest.name
+            for path in paths:
+                manifest.write(f"file '{path}'\n")
+        try:
+            subprocess.run(
+                [imageio_ffmpeg.get_ffmpeg_exe(), "-hide_banner", "-loglevel", "error",
+                 "-f", "concat", "-safe", "0", "-i", manifest_path,
+                 "-c", "copy", "-y", output_path],
+                check=True, capture_output=True, text=True, timeout=90,
+            )
+        finally:
+            os.remove(manifest_path)
+        return
+
+    from pydub import AudioSegment
+
     combined = AudioSegment.empty()
-    for p in paths:
-        combined += AudioSegment.from_mp3(p)
+    for path in paths:
+        combined += AudioSegment.from_mp3(path)
     combined.export(output_path, format="mp3")
 
 

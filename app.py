@@ -1,31 +1,57 @@
 import os
 import dotenv
 import uuid
-from flask import Flask, request, jsonify, render_template, send_file
+from datetime import timedelta
+from flask import Flask, request, jsonify, render_template, send_file, session
 from werkzeug.utils import secure_filename
 from pypdf import PdfReader
+
+dotenv.load_dotenv()
 
 from core import vectorstore, chat_history
 from core.rag_pipeline import ingest_document, answer_query
 from core.audio_generator import generate_audio_overview
-from core.config import UPLOAD_FOLDER, DEFAULT_TOP_K, DEFAULT_HYBRID_ALPHA, CHUNK_SIZE, CHUNK_OVERLAP, AUDIO_CACHE_DIR
-
-dotenv.load_dotenv()
+from core.config import (UPLOAD_FOLDER, DEFAULT_TOP_K, DEFAULT_HYBRID_ALPHA,
+                         CHUNK_SIZE, CHUNK_OVERLAP, AUDIO_CACHE_DIR, RAG_MODE,
+                         MAX_HOSTED_SOURCES)
 
 app = Flask(__name__)
+if RAG_MODE == "hosted":
+    app.secret_key = os.getenv("FLASK_SECRET_KEY")
+    if not app.secret_key:
+        raise RuntimeError("FLASK_SECRET_KEY is required in hosted mode.")
+    app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024
+    app.config["SESSION_COOKIE_SECURE"] = os.getenv("SESSION_COOKIE_SECURE", "true").lower() == "true"
+    app.config["SESSION_COOKIE_HTTPONLY"] = True
+    app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+    app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=30)
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(AUDIO_CACHE_DIR, exist_ok=True)
 
 # Warm the embedding model at startup so the first query isn't slow.
-try:
-    from core.embeddings import get_embedding_model
-    get_embedding_model()
-except Exception as _e:
-    print(f"[startup] Embedding model warm-up skipped: {_e}")
+if RAG_MODE == "local":
+    try:
+        from core.embeddings import get_embedding_model
+        get_embedding_model()
+    except Exception as _e:
+        print(f"[startup] Embedding model warm-up skipped: {_e}")
 
 
 ALLOWED_EXTENSIONS = {".pdf", ".txt", ".md"}
 DEFAULT_NOTEBOOK = "default_kb"
+
+
+@app.before_request
+def ensure_workspace():
+    if RAG_MODE == "hosted" and "workspace_id" not in session:
+        session.permanent = True
+        session["workspace_id"] = uuid.uuid4().hex
+
+
+def scoped_notebook(name: str = None) -> str:
+    name = (name or DEFAULT_NOTEBOOK).strip() or DEFAULT_NOTEBOOK
+    name = name[:100]
+    return f"{session['workspace_id']}:{name}" if RAG_MODE == "hosted" else name
 
 
 def extract_text(file_path: str) -> str:
@@ -46,6 +72,7 @@ def index():
         default_chunk_size=CHUNK_SIZE,
         default_chunk_overlap=CHUNK_OVERLAP,
         default_notebook=DEFAULT_NOTEBOOK,
+        rag_mode=RAG_MODE,
     )
 
 
@@ -55,7 +82,7 @@ def index():
 
 @app.route("/api/sources", methods=["GET"])
 def get_sources():
-    notebook = request.args.get("notebook", DEFAULT_NOTEBOOK)
+    notebook = scoped_notebook(request.args.get("notebook"))
     return jsonify({"status": "success", "sources": vectorstore.list_sources(notebook)})
 
 
@@ -66,11 +93,15 @@ def upload_sources():
     if not files:
         return jsonify({"status": "error", "message": "No files selected."}), 400
 
-    notebook = request.form.get("notebook", DEFAULT_NOTEBOOK).strip() or DEFAULT_NOTEBOOK
+    notebook = scoped_notebook(request.form.get("notebook"))
+    api_key = (request.form.get("gemini_api_key") or "").strip() or None
+    if RAG_MODE == "hosted" and not (api_key or os.getenv("GEMINI_API_KEY")):
+        return jsonify({"status": "error", "message": "Enter a Gemini API key before uploading."}), 400
     chunk_size = request.form.get("chunk_size", type=int)
     chunk_overlap = request.form.get("chunk_overlap", type=int)
 
     results = []
+    existing_sources = {item["source"] for item in vectorstore.list_sources(notebook)} if RAG_MODE == "hosted" else set()
     for uploaded_file in files:
         if uploaded_file.filename == "":
             continue
@@ -81,7 +112,15 @@ def upload_sources():
             continue
 
         filename = secure_filename(uploaded_file.filename)
-        file_path = os.path.join(UPLOAD_FOLDER, filename)
+        if not filename:
+            results.append({"filename": uploaded_file.filename, "status": "error",
+                             "message": "Please use a filename with letters or numbers."})
+            continue
+        if RAG_MODE == "hosted" and filename not in existing_sources and len(existing_sources) >= MAX_HOSTED_SOURCES:
+            results.append({"filename": filename, "status": "error",
+                             "message": f"Demo limit: {MAX_HOSTED_SOURCES} sources per notebook."})
+            continue
+        file_path = os.path.join(UPLOAD_FOLDER, f"{uuid.uuid4().hex}_{filename}")
 
         try:
             uploaded_file.save(file_path)
@@ -93,12 +132,14 @@ def upload_sources():
 
             chunk_count = ingest_document(
                 text=text, source=filename, collection_name=notebook,
-                chunk_size=chunk_size, chunk_overlap=chunk_overlap,
+                chunk_size=chunk_size, chunk_overlap=chunk_overlap, api_key=api_key,
             )
             results.append({"filename": filename, "status": "success", "chunk_count": chunk_count})
+            existing_sources.add(filename)
 
         except Exception as e:
-            results.append({"filename": uploaded_file.filename, "status": "error", "message": str(e)})
+            message = str(e) if RAG_MODE == "local" or isinstance(e, ValueError) else "Could not index this file. Check your Gemini quota and Supabase connection."
+            results.append({"filename": uploaded_file.filename, "status": "error", "message": message})
         finally:
             if os.path.exists(file_path):
                 os.remove(file_path)
@@ -109,7 +150,7 @@ def upload_sources():
 
 @app.route("/api/sources/<path:source_name>", methods=["DELETE"])
 def delete_source(source_name):
-    notebook = request.args.get("notebook", DEFAULT_NOTEBOOK)
+    notebook = scoped_notebook(request.args.get("notebook"))
     removed = vectorstore.delete_source(notebook, source_name)
     return jsonify({"status": "success", "message": f"Removed {removed} chunks from '{source_name}'."})
 
@@ -126,7 +167,7 @@ def chat():
     if not query_text:
         return jsonify({"status": "error", "message": "Message cannot be empty."}), 400
 
-    notebook = data.get("notebook", DEFAULT_NOTEBOOK).strip() or DEFAULT_NOTEBOOK
+    notebook = scoped_notebook(data.get("notebook"))
     top_k = int(data.get("top_k", DEFAULT_TOP_K))
     alpha = float(data.get("alpha", DEFAULT_HYBRID_ALPHA))
     api_key = (data.get("gemini_api_key") or "").strip() or None
@@ -139,18 +180,19 @@ def chat():
             "retrieved_chunks": result["retrieved_chunks"],
         })
     except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+        message = str(e) if RAG_MODE == "local" else "Could not answer right now. Check your Gemini quota and Supabase connection."
+        return jsonify({"status": "error", "message": message}), 500
 
 
 @app.route("/api/chat/history", methods=["GET"])
 def get_chat_history():
-    notebook = request.args.get("notebook", DEFAULT_NOTEBOOK)
+    notebook = scoped_notebook(request.args.get("notebook"))
     return jsonify({"status": "success", "history": chat_history.get_history(notebook)})
 
 
 @app.route("/api/chat/history", methods=["DELETE"])
 def reset_chat_history():
-    notebook = request.args.get("notebook", DEFAULT_NOTEBOOK)
+    notebook = scoped_notebook(request.args.get("notebook"))
     chat_history.clear_history(notebook)
     return jsonify({"status": "success", "message": "Conversation cleared."})
 
@@ -163,7 +205,7 @@ def reset_chat_history():
 def generate_audio():
     data = request.get_json(silent=True) or {}
 
-    notebook = data.get("notebook", DEFAULT_NOTEBOOK).strip() or DEFAULT_NOTEBOOK
+    notebook = scoped_notebook(data.get("notebook"))
     mode = (data.get("mode") or "narrator").strip()
     topic = (data.get("topic") or "").strip()
     api_key = (data.get("gemini_api_key") or "").strip() or None
@@ -211,7 +253,11 @@ def serve_audio(filename):
 
 @app.route("/api/notebooks", methods=["GET"])
 def list_notebooks():
-    return jsonify({"status": "success", "notebooks": vectorstore.list_collections()})
+    notebooks = vectorstore.list_collections()
+    if RAG_MODE == "hosted":
+        prefix = session["workspace_id"] + ":"
+        notebooks = [name[len(prefix):] for name in notebooks if name.startswith(prefix)]
+    return jsonify({"status": "success", "notebooks": notebooks})
 
 
 @app.route("/health")

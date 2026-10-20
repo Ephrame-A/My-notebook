@@ -1,0 +1,17 @@
+.git
+.env
+.venv
+venv
+__pycache__
+**/__pycache__
+*.pyc
+.pytest_cache
+.agents
+.aws
+.codex
+chroma_db
+audio_cache
+uploads
+static/demo.mp4
+static/demo.gif
+static/audio_generated.mp3

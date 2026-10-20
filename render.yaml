@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: marginal-hosted
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile.hosted
+    healthCheckPath: /health
+    envVars:
+      - key: SUPABASE_DB_URL
+        sync: false
+      - key: FLASK_SECRET_KEY
+        generateValue: true

@@ -34,7 +34,7 @@ def _normalize(scores: Dict[str, float]) -> Dict[str, float]:
 
 
 def retrieve(collection_name: str, query: str, top_k: int = DEFAULT_TOP_K,
-             alpha: float = DEFAULT_HYBRID_ALPHA) -> List[Dict[str, Any]]:
+             alpha: float = DEFAULT_HYBRID_ALPHA, api_key: str = None) -> List[Dict[str, Any]]:
     """Runs hybrid retrieval and returns a ranked list of chunks with score
     breakdowns, so the UI can show *why* each chunk was retrieved."""
 
@@ -46,7 +46,7 @@ def retrieve(collection_name: str, query: str, top_k: int = DEFAULT_TOP_K,
         return []
 
     # --- Dense (semantic) scores ---
-    query_embedding = embed_query(query)
+    query_embedding = embed_query(query, api_key=api_key)
     dense_raw = vectorstore.dense_search(collection_name, query_embedding, top_k=max(top_k * 3, top_k))
     dense_scores: Dict[str, float] = {}
     if dense_raw["ids"] and dense_raw["ids"][0]:

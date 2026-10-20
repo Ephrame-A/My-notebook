@@ -11,6 +11,7 @@ chips that open the matching source passage.
 """
 
 import os
+import hashlib
 from typing import List, Dict, Any
 
 from core.chunking import chunk_text
@@ -18,11 +19,14 @@ from core.embeddings import embed_texts
 from core import vectorstore
 from core.retriever import retrieve
 from core import chat_history
-from core.config import GEMINI_MODEL_NAME, DEFAULT_TOP_K, DEFAULT_HYBRID_ALPHA
+from core.config import (GEMINI_MODEL_NAME, DEFAULT_TOP_K, DEFAULT_HYBRID_ALPHA,
+                         RAG_MODE, GEMINI_EMBEDDING_MODEL, MAX_HOSTED_CHUNKS_PER_FILE,
+                         CHUNK_SIZE, CHUNK_OVERLAP)
 
 
 def ingest_document(text: str, source: str, collection_name: str,
-                     chunk_size: int = None, chunk_overlap: int = None) -> int:
+                     chunk_size: int = None, chunk_overlap: int = None,
+                     api_key: str = None) -> int:
     """Chunks, embeds, and stores a document's text. Returns chunk count."""
     kwargs = {}
     if chunk_size:
@@ -34,10 +38,23 @@ def ingest_document(text: str, source: str, collection_name: str,
     if not chunks:
         return 0
 
-    embeddings = embed_texts(chunks)
+    if RAG_MODE == "hosted" and len(chunks) > MAX_HOSTED_CHUNKS_PER_FILE:
+        raise ValueError(f"This file has {len(chunks)} passages; the demo limit is {MAX_HOSTED_CHUNKS_PER_FILE}. Try a shorter file or larger chunk size.")
+
+    effective_size = kwargs.get("chunk_size", CHUNK_SIZE)
+    effective_overlap = kwargs.get("overlap", CHUNK_OVERLAP)
+    fingerprint = hashlib.sha256(
+        repr((text, effective_size, effective_overlap, GEMINI_EMBEDDING_MODEL)).encode("utf-8")
+    ).hexdigest()
+    cached_count = vectorstore.cached_source_count(collection_name, source, fingerprint)
+    if cached_count:
+        return cached_count
+
+    embeddings = embed_texts(chunks, api_key=api_key, source=source)
     chunk_ids = [f"{source}::chunk_{i}" for i in range(len(chunks))]
 
-    vectorstore.add_chunks(collection_name, chunk_ids, chunks, embeddings, source)
+    vectorstore.add_chunks(collection_name, chunk_ids, chunks, embeddings, source,
+                           fingerprint=fingerprint)
     return len(chunks)
 
 
@@ -70,7 +87,7 @@ def answer_query(collection_name: str, query: str, top_k: int = DEFAULT_TOP_K,
                   api_key: str = None) -> Dict[str, Any]:
     """Runs retrieval, builds a citation-aware prompt, calls the LLM, and
     records the turn in the notebook's conversation history."""
-    retrieved = retrieve(collection_name, query, top_k=top_k, alpha=alpha)
+    retrieved = retrieve(collection_name, query, top_k=top_k, alpha=alpha, api_key=api_key)
 
     if not retrieved:
         return {

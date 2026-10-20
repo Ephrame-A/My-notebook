@@ -14,6 +14,7 @@ BM25 score for a term in a document combines:
 
 import math
 import re
+import hashlib
 from typing import List, Dict, Tuple
 
 
@@ -91,9 +92,15 @@ def build_bm25_index(doc_ids: List[str], texts: List[str]) -> BM25Index:
 _bm25_cache: Dict[str, Tuple[str, BM25Index]] = {}
 
 
+def invalidate_bm25(collection_name: str) -> None:
+    _bm25_cache.pop(collection_name, None)
+
+
 def get_cached_bm25(collection_name: str, doc_ids: List[str], texts: List[str]) -> BM25Index:
     """Return a cached BM25 index, rebuilding only when the document set changes."""
-    version_token = str(sorted(doc_ids))
+    version_token = hashlib.sha256(
+        repr(sorted(zip(doc_ids, texts))).encode("utf-8")
+    ).hexdigest()
     cached = _bm25_cache.get(collection_name)
     if cached is not None and cached[0] == version_token:
         return cached[1]
