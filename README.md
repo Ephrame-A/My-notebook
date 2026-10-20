@@ -55,6 +55,9 @@ python app.py
 
 ## Run with Docker
 
+Docker Compose uses the local embedding model and Chroma via
+[`Dockerfile.local`](Dockerfile.local).
+
 ```bash
 cp .env.example .env   
 docker compose up --build
@@ -74,9 +77,10 @@ the default when `RAG_MODE=local`; its Chroma data is not migrated automatically
    this URI private. It is the value for `SUPABASE_DB_URL`.
 3. Push this repository to GitHub and create a Render **Blueprint** from it.
    [`render.yaml`](render.yaml) selects the small hosted Docker image and free
-   web service. Enter `SUPABASE_DB_URL` when Render prompts you; Render
-   generates `FLASK_SECRET_KEY`. You can also deploy a Docker web service
-   manually using [`Dockerfile.hosted`](Dockerfile.hosted) and set both values.
+   web service. The default [`Dockerfile`](Dockerfile) also selects the hosted
+   build if you create a Docker web service manually. Enter `SUPABASE_DB_URL`
+   when Render prompts you; Render generates `FLASK_SECRET_KEY`. For a manual
+   web service, set both values in Render's environment settings.
 4. Open the Render URL. Each tester enters **their own Gemini API key** in the
    app before uploading a document or asking a question. The key is sent with
    each request and is not stored by the app. This keeps your own key from

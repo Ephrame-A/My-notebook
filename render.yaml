@@ -3,7 +3,7 @@ services:
     name: marginal-hosted
     runtime: docker
     plan: free
-    dockerfilePath: ./Dockerfile.hosted
+    dockerfilePath: ./Dockerfile
     healthCheckPath: /health
     envVars:
       - key: SUPABASE_DB_URL
